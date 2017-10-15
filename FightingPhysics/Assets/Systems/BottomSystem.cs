@@ -12,63 +12,97 @@ public class BottomSystem : EgoSystem<
         EgoEvents<CollisionExitEvent>.AddHandler(Handle);
     }
 
-    public override void Update()
+    public override void FixedUpdate()
     {
-        constraint.ForEachGameObject((egoComponent, bottom, transform) =>
-        {
-            bool noGroundFound = true;
+        //constraint.ForEachGameObject((egoComponent, bottom, transform) =>
+        //{
+        //    bool noGroundFound = true;
 
-            Collider[] hitColliders = Physics.OverlapSphere(transform.position, transform.lossyScale.x *.5f);
-            int i = 0;
-            while (i < hitColliders.Length)
-            {
-                var hitEgoComponent = hitColliders[i].GetComponent<EgoComponent>();
-                if (hitEgoComponent.HasComponents<Ground>())
-                {
-                    SetOnGround(bottom);
-                    noGroundFound = false;
-                }
-                i++;
-            }
-            if (noGroundFound)
-            {
-                SetOffGround(bottom);
-            }
-        });
+        //    Collider[] hitColliders = Physics.OverlapSphere(transform.position, transform.lossyScale.x *.5f);
+        //    int i = 0;
+        //    while (i < hitColliders.Length)
+        //    {
+        //        var hitEgoComponent = hitColliders[i].GetComponent<EgoComponent>();
+        //        if (hitEgoComponent.HasComponents<Ground>())
+        //        {
+        //            SetOnGround(bottom);
+        //            noGroundFound = false;
+        //        }
+        //        i++;
+        //    }
+        //    if (noGroundFound)
+        //    {
+        //        SetOffGround(bottom);
+        //    }
+        //});
     }
 
     void Handle(CollisionEnterEvent e)
     {
-        if (e.egoComponent1.HasComponents<BottomComponent>() && e.egoComponent2.HasComponents<Ground>())
+        Debug.Log("CollisionEnterEvent");
+        if (e.egoComponent1.HasComponents<BodyPartsComponent>() && e.egoComponent2.HasComponents<Ground>())
         {
-            BottomComponent bottom;
-            if (!e.egoComponent1.TryGetComponents(out bottom))
+            BodyPartsComponent bodyPartsComponent;
+            
+            if (!e.egoComponent1.TryGetComponents(out bodyPartsComponent))
                 return;
-            SetOnGround(bottom);
+            foreach (BodyPart part in bodyPartsComponent.bodyParts) {
+                if (part.GetType() == typeof(BottomComponent))
+                {
+                    BottomComponent bottom = (BottomComponent) part;
+                    SetOnGround(bottom);
+                }
+            }
         }
-        if (e.egoComponent1.HasComponents<Ground>() && e.egoComponent2.HasComponents<BottomComponent>())
+        if (e.egoComponent1.HasComponents<Ground>() && e.egoComponent2.HasComponents<BodyPartsComponent>())
         {
-            BottomComponent bottom;
-            if (!e.egoComponent2.TryGetComponents(out bottom))
+            BodyPartsComponent bodyPartsComponent;
+
+            if (!e.egoComponent2.TryGetComponents(out bodyPartsComponent))
                 return;
-            SetOnGround(bottom);
+            foreach (BodyPart part in bodyPartsComponent.bodyParts)
+            {
+                if (part.GetType() == typeof(BottomComponent))
+                {
+                    BottomComponent bottom = (BottomComponent)part;
+                    SetOnGround(bottom);
+                }
+            }
         }
     }
+
     void Handle(CollisionExitEvent e)
     {
-        if (e.egoComponent1.HasComponents<BottomComponent>() && e.egoComponent2.HasComponents<Ground>())
+        Debug.Log("CollisionExitEvent");
+        if (e.egoComponent1.HasComponents<BodyPartsComponent>() && e.egoComponent2.HasComponents<Ground>())
         {
-            BottomComponent bottom;
-            if (!e.egoComponent1.TryGetComponents(out bottom))
+            BodyPartsComponent bodyPartsComponent;
+
+            if (!e.egoComponent1.TryGetComponents(out bodyPartsComponent))
                 return;
-            SetOffGround(bottom);
+            foreach (BodyPart part in bodyPartsComponent.bodyParts)
+            {
+                if (part.GetType() == typeof(BottomComponent))
+                {
+                    BottomComponent bottom = (BottomComponent)part;
+                    SetOffGround(bottom);
+                }
+            }
         }
-        if (e.egoComponent1.HasComponents<Ground>() && e.egoComponent2.HasComponents<BottomComponent>())
+        if (e.egoComponent1.HasComponents<Ground>() && e.egoComponent2.HasComponents<BodyPartsComponent>())
         {
-            BottomComponent bottom;
-            if (!e.egoComponent2.TryGetComponents(out bottom))
+            BodyPartsComponent bodyPartsComponent;
+
+            if (!e.egoComponent2.TryGetComponents(out bodyPartsComponent))
                 return;
-            SetOffGround(bottom);
+            foreach (BodyPart part in bodyPartsComponent.bodyParts)
+            {
+                if (part.GetType() == typeof(BottomComponent))
+                {
+                    BottomComponent bottom = (BottomComponent)part;
+                    SetOffGround(bottom);
+                }
+            }
         }
     }
 
