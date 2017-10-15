@@ -6298,12 +6298,19 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 6d966fda01d348243bf73b427407bcdc, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
---- !u!114 &1127232667 stripped
+--- !u!114 &1127232664
 MonoBehaviour:
-  m_PrefabParentObject: {fileID: 114267799899339052, guid: f0917164fa0284a4e8d564c4c1d642d3,
-    type: 2}
-  m_PrefabInternal: {fileID: 2074366836}
-  m_Script: {fileID: 11500000, guid: 62bff11f14a68be4eab7b0f9e01f681e, type: 3}
+  m_ObjectHideFlags: 0
+  m_PrefabParentObject: {fileID: 0}
+  m_PrefabInternal: {fileID: 0}
+  m_GameObject: {fileID: 1127232661}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 0c6b7802116718441b1b05671945c843, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  touchingGround: 0
+  collider: {fileID: 2074366838}
 --- !u!1001 &1133240902
 Prefab:
   m_ObjectHideFlags: 0
@@ -11275,7 +11282,9 @@ Prefab:
       propertyPath: m_LocalPosition.y
       value: -1.038
       objectReference: {fileID: 0}
-    m_RemovedComponents: []
+    m_RemovedComponents:
+    - {fileID: 114707078044545932, guid: f0917164fa0284a4e8d564c4c1d642d3, type: 2}
+    - {fileID: 114987215031587172, guid: f0917164fa0284a4e8d564c4c1d642d3, type: 2}
   m_ParentPrefab: {fileID: 100100000, guid: f0917164fa0284a4e8d564c4c1d642d3, type: 2}
   m_IsPrefabParent: 0
 --- !u!1 &2074366837 stripped
@@ -11295,18 +11304,6 @@ BoxCollider:
   serializedVersion: 2
   m_Size: {x: 1.0000002, y: 1, z: 1.0000002}
   m_Center: {x: -0.0000019073486, y: 0, z: 0.0000038146973}
---- !u!114 &2074366839
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_PrefabParentObject: {fileID: 0}
-  m_PrefabInternal: {fileID: 0}
-  m_GameObject: {fileID: 2074366837}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 203a52910e91ed5418772053c95c28b6, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  actor: {fileID: 1127232667}
 --- !u!1001 &2078016718
 Prefab:
   m_ObjectHideFlags: 0
