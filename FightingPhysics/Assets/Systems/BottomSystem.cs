@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using UnityEngine;
 
 public class BottomSystem : EgoSystem<
-    EgoConstraint<BottomComponent, Transform, ActorComponent, Movement>
+    EgoConstraint<BottomComponent, Transform, ActorComponent, BoxCollider>
 >
 {
     public override void Start()
@@ -11,24 +11,21 @@ public class BottomSystem : EgoSystem<
         EgoEvents<CollisionEnterEvent>.AddHandler(Handle);
         EgoEvents<CollisionExitEvent>.AddHandler(Handle);
         EgoEvents<JumpEvent>.AddHandler(Handle);
-    }
-
-    public override void Update()
-    {
-        constraint.ForEachGameObject((egoComponent, bottom, transform, actor, movement) =>
-        {
-           if(movement.velocity.y < 0f)
-            {
-                bottom.collider.enabled = true;
-            }
-        });
+        EgoEvents<FallEvent>.AddHandler(Handle);
     }
 
     void Handle(CollisionEnterEvent e)
     {
-        Debug.Log("CollisionEnterEvent");
+
         if (e.egoComponent1.HasComponents<BottomComponent>() && e.egoComponent2.HasComponents<Ground>())
         {
+            foreach (ContactPoint contact in e.collision.contacts)
+            {
+                if (contact.normal.y <=0f)
+                {
+                    return;
+                }
+            }
             ActorComponent actor;
             if (!e.egoComponent1.TryGetComponents(out actor))
                 return;           
@@ -36,8 +33,14 @@ public class BottomSystem : EgoSystem<
         }
         if (e.egoComponent2.HasComponents<BottomComponent>() && e.egoComponent1.HasComponents<Ground>())
         {
+            foreach (ContactPoint contact in e.collision.contacts)
+            {
+                if (contact.normal.y <= 0f)
+                {
+                    return;
+                }
+            }
             ActorComponent actor;
-
             if (!e.egoComponent2.TryGetComponents(out actor))
                 return;
             SetOnGround(actor);
@@ -46,7 +49,7 @@ public class BottomSystem : EgoSystem<
 
     void Handle(CollisionExitEvent e)
     {
-        Debug.Log("CollisionExitEvent");
+        Debug.Log("collision exit");
         if (e.egoComponent1.HasComponents<BottomComponent>() && e.egoComponent2.HasComponents<Ground>())
         {
             ActorComponent actor;
@@ -65,19 +68,28 @@ public class BottomSystem : EgoSystem<
     }
     void Handle(JumpEvent e)
     {
-        Debug.Log("JumpEvent");
-        constraint.ForEachGameObject((egoComponent, bottomComponent, transform, actor, movement) =>
+        constraint.ForEachGameObject((egoComponent, bottomComponent, transform, actor, collider) =>
         {
             if (actor.guid == e.actorGuid)
             {
-                bottomComponent.collider.enabled = false;
+                collider.enabled = false;
+            }
+        });
+    }
+    void Handle(FallEvent e)
+    {
+        constraint.ForEachGameObject((egoComponent, bottomComponent, transform, actor, collider) =>
+        {
+            if (actor.guid == e.actorGuid)
+            {
+                collider.enabled = true;
             }
         });
     }
 
     void SetOnGround(ActorComponent actorComponent)
     {
-        constraint.ForEachGameObject((egoComponent, bottomComponent, transform, actor, movement) =>
+        constraint.ForEachGameObject((egoComponent, bottomComponent, transform, actor, collider) =>
         {
             if (actor.guid == actorComponent.guid)
                 if (!bottomComponent.touchingGround)
@@ -90,7 +102,7 @@ public class BottomSystem : EgoSystem<
     }
     void SetOffGround(ActorComponent actorComponent)
     {        
-        constraint.ForEachGameObject((egoComponent, bottomComponent, transform, actor, movement) =>
+        constraint.ForEachGameObject((egoComponent, bottomComponent, transform, actor, collider) =>
         {
             if (actor.guid == actorComponent.guid)
                 if (bottomComponent.touchingGround)

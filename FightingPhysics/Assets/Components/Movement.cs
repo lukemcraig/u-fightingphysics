@@ -4,9 +4,9 @@ using UnityEngine;
 [DisallowMultipleComponent]
 public class Movement : MonoBehaviour
 {
-    public bool crouched = false;
     public bool onGround = false;
     public bool onPassThrough = false;
+    public bool falling = false;
 
     public Vector3 velocity = new Vector3(0f, 0f, 0f);
 
