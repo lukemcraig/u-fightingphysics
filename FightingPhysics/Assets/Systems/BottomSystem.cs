@@ -3,13 +3,14 @@ using System.Collections.Generic;
 using UnityEngine;
 
 public class BottomSystem : EgoSystem<
-    EgoConstraint<BottomComponent, Transform>
+    EgoConstraint<BottomComponent, Transform, BoxCollider, ChildActorComponent>
 >
 {
     public override void Start()
     {        
         EgoEvents<CollisionEnterEvent>.AddHandler(Handle);
         EgoEvents<CollisionExitEvent>.AddHandler(Handle);
+        EgoEvents<JumpEvent>.AddHandler(Handle);
     }
 
     public override void FixedUpdate()
@@ -105,13 +106,29 @@ public class BottomSystem : EgoSystem<
             }
         }
     }
+    void Handle(JumpEvent e)
+    {
+        Debug.Log("JumpEvent");
+        constraint.ForEachGameObject((egoComponent, bottomComponent, transform, collider, childActor) =>
+        {
+            if (childActor.actor.guid == e.actorGuid)
+            {
+                collider.enabled = false;
+            }
+        });
+    }
 
     void SetOnGround(BottomComponent bottom)
     {
         if (!bottom.touchingGround)
         {
-            var e = new TouchGroundEvent(bottom.actor.guid, true);
-            EgoEvents<TouchGroundEvent>.AddEvent(e);
+            ChildActorComponent childActor = bottom.GetComponent<ChildActorComponent>();
+            if (childActor!=null)
+            {
+                var e = new TouchGroundEvent(childActor.actor.guid, true);
+                EgoEvents<TouchGroundEvent>.AddEvent(e);
+            }
+            
         }
         bottom.touchingGround = true;
         
@@ -119,9 +136,13 @@ public class BottomSystem : EgoSystem<
     void SetOffGround(BottomComponent bottom)
     {        
         if (bottom.touchingGround)
-        {
-            var e = new TouchGroundEvent(bottom.actor.guid, false);
-            EgoEvents<TouchGroundEvent>.AddEvent(e);
+        {           
+            ChildActorComponent childActor = bottom.GetComponent<ChildActorComponent>();
+            if (childActor != null)
+            {
+                var e = new TouchGroundEvent(childActor.actor.guid, false);
+                EgoEvents<TouchGroundEvent>.AddEvent(e);
+            }
         }
         bottom.touchingGround = false;
     }
