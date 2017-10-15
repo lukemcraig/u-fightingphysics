@@ -54,9 +54,9 @@ public class MovementSystem : EgoSystem<
                 {
                     Dive(movement, intendedVector);
                 }
-                if (intendedVector.y >= 0)
+                if (intendedVector.y >= 0f)
                 {
-                    Fall(movement);
+                   Fall(movement);
                 }
                 movement.velocity.x = Mathf.Lerp(movement.velocity.x, 0f, Time.fixedDeltaTime * movement.windResistance);
             }
@@ -69,20 +69,13 @@ public class MovementSystem : EgoSystem<
             }
             if (movement.onGround)
             {
+                movement.falling = false;
                 if (Mathf.Abs(movement.velocity.x) > 3f)
                 {
                     var e = new StepEvent(actor.guid);
                     EgoEvents<StepEvent>.AddEvent(e);
                 }
                 BecomeStationary(movement);
-                if (intendedVector.y < 0)
-                {
-                    movement.crouched = true;
-                }
-                if (intendedVector.y >= 0)
-                {
-                    movement.crouched = false;
-                }
             }
             if (input.jumpKeyPressed)
             {
@@ -96,10 +89,11 @@ public class MovementSystem : EgoSystem<
             }
 
             SetVelocity(rigidbody, movement);
-            if (movement.velocity.y < 0f)
+            if (movement.velocity.y < 0f && !movement.falling)
             {
                 var fallEvent = new FallEvent(actor.guid);
                 EgoEvents<FallEvent>.AddEvent(fallEvent);
+                movement.falling = true;
             }
         });
 
@@ -107,30 +101,31 @@ public class MovementSystem : EgoSystem<
 
     private static void Dive(Movement movement, Vector3 intendedVector)
     {
+      
         movement.velocity.y = Mathf.Lerp(movement.velocity.y, intendedVector.y, Time.fixedDeltaTime);
-
     }
 
     private static void Fall(Movement movement)
     {
+        Debug.Log("falling");
         movement.velocity.y = Mathf.Lerp(movement.velocity.y, movement.fallSpeed, Time.fixedDeltaTime);
     }
 
     private static void BecomeStationary(Movement movement)
     {
+       
         float t = movement.friction * Time.fixedDeltaTime;
         if (Mathf.Abs(movement.velocity.x) < 0.01f)
         {
             t = 1f;
         }
-        movement.velocity = Vector3.Lerp(movement.velocity, Vector3.zero, t);
+        movement.velocity.x = Mathf.Lerp(movement.velocity.x, 0f, t);
 
     }
 
     private static void SetVelocity(Rigidbody rigidbody, Movement movement)
     {
-        rigidbody.velocity = new Vector3(movement.velocity.x, movement.velocity.y, movement.velocity.z);
-       
+        rigidbody.velocity = new Vector3(movement.velocity.x, movement.velocity.y, movement.velocity.z);       
     }
 
     void TryJump(Movement movement, Rigidbody rigidbody, ActorComponent actor)
@@ -139,13 +134,15 @@ public class MovementSystem : EgoSystem<
         {
             float jumpStrength = movement.jumpStrengths[movement.numberOfJumpsRemaining - 1];
             if (movement.velocity.y <= 0f)
-            {
+            {                
                 movement.velocity.y = jumpStrength;
+                
             }
             else
-            {
+            {               
                 movement.velocity.y += jumpStrength;
             }
+            movement.falling = false;
 
             var e = new JumpEvent(actor.guid, movement.velocity);
             EgoEvents<JumpEvent>.AddEvent(e);
@@ -221,6 +218,7 @@ public class MovementSystem : EgoSystem<
 
     void SetOnGround(Movement movement)
     {
+       
         movement.onGround = true;
         movement.velocity.y = 0;
         movement.numberOfJumpsRemaining = movement.jumpStrengths.Length;
@@ -228,6 +226,7 @@ public class MovementSystem : EgoSystem<
     }
     void TryDash(Movement movement, ActorComponent actor)
     {
+        
         movement.velocity.x = (-movement.velocity.x) + Mathf.Sign(movement.velocity.x) * 30f;
         movement.velocity.y -= movement.velocity.y;
         var e = new DashEvent(actor.guid, movement.velocity);

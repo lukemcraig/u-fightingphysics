@@ -16,7 +16,7 @@ public class BottomSystem : EgoSystem<
 
     void Handle(CollisionEnterEvent e)
     {
-        Debug.Log("CollisionEnterEvent");
+
         if (e.egoComponent1.HasComponents<BottomComponent>() && e.egoComponent2.HasComponents<Ground>())
         {
             ActorComponent actor;
@@ -36,7 +36,7 @@ public class BottomSystem : EgoSystem<
 
     void Handle(CollisionExitEvent e)
     {
-        Debug.Log("CollisionExitEvent");
+     
         if (e.egoComponent1.HasComponents<BottomComponent>() && e.egoComponent2.HasComponents<Ground>())
         {
             ActorComponent actor;
@@ -55,7 +55,6 @@ public class BottomSystem : EgoSystem<
     }
     void Handle(JumpEvent e)
     {
-        Debug.Log("JumpEvent");
         constraint.ForEachGameObject((egoComponent, bottomComponent, transform, actor, collider) =>
         {
             if (actor.guid == e.actorGuid)
@@ -66,7 +65,6 @@ public class BottomSystem : EgoSystem<
     }
     void Handle(FallEvent e)
     {
-        Debug.Log("FallEvent");
         constraint.ForEachGameObject((egoComponent, bottomComponent, transform, actor, collider) =>
         {
             if (actor.guid == e.actorGuid)
