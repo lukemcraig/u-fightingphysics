@@ -9,9 +9,9 @@ public class FightgameInterface : MonoBehaviour
         EgoSystems.Add(
             new ActorSystem(),
             new ChildActorSystem(),          
-            new InputSystem(),
-            new BottomSystem(),
+            new InputSystem(),            
             new MovementSystem(),
+            new BottomSystem(),
 
             new JumpParticleSystem(),
             new RunParticleSystem(),

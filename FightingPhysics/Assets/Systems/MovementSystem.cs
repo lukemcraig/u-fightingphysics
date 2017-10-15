@@ -107,7 +107,7 @@ public class MovementSystem : EgoSystem<
 
     private static void Fall(Movement movement)
     {
-        Debug.Log("falling");
+        //Debug.Log("falling");
         movement.velocity.y = Mathf.Lerp(movement.velocity.y, movement.fallSpeed, Time.fixedDeltaTime);
     }
 

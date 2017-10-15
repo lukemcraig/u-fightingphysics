@@ -19,6 +19,13 @@ public class BottomSystem : EgoSystem<
 
         if (e.egoComponent1.HasComponents<BottomComponent>() && e.egoComponent2.HasComponents<Ground>())
         {
+            foreach (ContactPoint contact in e.collision.contacts)
+            {
+                if (contact.normal.y <=0f)
+                {
+                    return;
+                }
+            }
             ActorComponent actor;
             if (!e.egoComponent1.TryGetComponents(out actor))
                 return;           
@@ -26,8 +33,14 @@ public class BottomSystem : EgoSystem<
         }
         if (e.egoComponent2.HasComponents<BottomComponent>() && e.egoComponent1.HasComponents<Ground>())
         {
+            foreach (ContactPoint contact in e.collision.contacts)
+            {
+                if (contact.normal.y <= 0f)
+                {
+                    return;
+                }
+            }
             ActorComponent actor;
-
             if (!e.egoComponent2.TryGetComponents(out actor))
                 return;
             SetOnGround(actor);
@@ -36,7 +49,7 @@ public class BottomSystem : EgoSystem<
 
     void Handle(CollisionExitEvent e)
     {
-     
+        Debug.Log("collision exit");
         if (e.egoComponent1.HasComponents<BottomComponent>() && e.egoComponent2.HasComponents<Ground>())
         {
             ActorComponent actor;
