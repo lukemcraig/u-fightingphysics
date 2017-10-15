@@ -96,6 +96,11 @@ public class MovementSystem : EgoSystem<
             }
 
             SetVelocity(rigidbody, movement);
+            if (movement.velocity.y < 0f)
+            {
+                var fallEvent = new FallEvent(actor.guid);
+                EgoEvents<FallEvent>.AddEvent(fallEvent);
+            }
         });
 
     }
@@ -125,6 +130,7 @@ public class MovementSystem : EgoSystem<
     private static void SetVelocity(Rigidbody rigidbody, Movement movement)
     {
         rigidbody.velocity = new Vector3(movement.velocity.x, movement.velocity.y, movement.velocity.z);
+       
     }
 
     void TryJump(Movement movement, Rigidbody rigidbody, ActorComponent actor)

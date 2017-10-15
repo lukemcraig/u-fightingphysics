@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using UnityEngine;
 
 public class BottomSystem : EgoSystem<
-    EgoConstraint<BottomComponent, Transform, ActorComponent, Movement>
+    EgoConstraint<BottomComponent, Transform, ActorComponent, BoxCollider>
 >
 {
     public override void Start()
@@ -11,17 +11,7 @@ public class BottomSystem : EgoSystem<
         EgoEvents<CollisionEnterEvent>.AddHandler(Handle);
         EgoEvents<CollisionExitEvent>.AddHandler(Handle);
         EgoEvents<JumpEvent>.AddHandler(Handle);
-    }
-
-    public override void Update()
-    {
-        constraint.ForEachGameObject((egoComponent, bottom, transform, actor, movement) =>
-        {
-           if(movement.velocity.y < 0f)
-            {
-                bottom.collider.enabled = true;
-            }
-        });
+        EgoEvents<FallEvent>.AddHandler(Handle);
     }
 
     void Handle(CollisionEnterEvent e)
@@ -66,18 +56,29 @@ public class BottomSystem : EgoSystem<
     void Handle(JumpEvent e)
     {
         Debug.Log("JumpEvent");
-        constraint.ForEachGameObject((egoComponent, bottomComponent, transform, actor, movement) =>
+        constraint.ForEachGameObject((egoComponent, bottomComponent, transform, actor, collider) =>
         {
             if (actor.guid == e.actorGuid)
             {
-                bottomComponent.collider.enabled = false;
+                collider.enabled = false;
+            }
+        });
+    }
+    void Handle(FallEvent e)
+    {
+        Debug.Log("FallEvent");
+        constraint.ForEachGameObject((egoComponent, bottomComponent, transform, actor, collider) =>
+        {
+            if (actor.guid == e.actorGuid)
+            {
+                collider.enabled = true;
             }
         });
     }
 
     void SetOnGround(ActorComponent actorComponent)
     {
-        constraint.ForEachGameObject((egoComponent, bottomComponent, transform, actor, movement) =>
+        constraint.ForEachGameObject((egoComponent, bottomComponent, transform, actor, collider) =>
         {
             if (actor.guid == actorComponent.guid)
                 if (!bottomComponent.touchingGround)
@@ -90,7 +91,7 @@ public class BottomSystem : EgoSystem<
     }
     void SetOffGround(ActorComponent actorComponent)
     {        
-        constraint.ForEachGameObject((egoComponent, bottomComponent, transform, actor, movement) =>
+        constraint.ForEachGameObject((egoComponent, bottomComponent, transform, actor, collider) =>
         {
             if (actor.guid == actorComponent.guid)
                 if (bottomComponent.touchingGround)

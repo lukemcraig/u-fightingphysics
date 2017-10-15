@@ -8,6 +8,7 @@ public class FightgameInterface : MonoBehaviour
         //Add Systems here:
         EgoSystems.Add(
             new ActorSystem(),
+            new ChildActorSystem(),
             new BodyPartsSystem(),
             new InputSystem(),           
             new MovementSystem(),
