@@ -6,7 +6,6 @@ public class MovementSystem : EgoSystem<
     EgoConstraint<Rigidbody, InputComponent, Movement, ActorComponent>
 >
 {
-    //float gravity = -9.8f;
     public override void Start()
     {
         constraint.ForEachGameObject((egoComponent, rigidbody, input, movement, actor) =>
@@ -14,10 +13,8 @@ public class MovementSystem : EgoSystem<
             movement.numberOfJumpsRemaining = movement.jumpStrengths.Length;
         });
 
-        //EgoEvents<CollisionEnterEvent>.AddHandler(Handle);
-        //EgoEvents<CollisionExitEvent>.AddHandler(Handle);
         EgoEvents<TouchGroundEvent>.AddHandler(Handle);
-
+        EgoEvents<TouchPassThroughEvent>.AddHandler(Handle);
     }
 
     public override void FixedUpdate()
@@ -25,25 +22,6 @@ public class MovementSystem : EgoSystem<
         // For each GameObject that fits the constraint...
         constraint.ForEachGameObject((egoComponent, rigidbody, input, movement, actor) =>
         {
-
-            //movement.onGround = false;
-            //movement.onPassThrough = false;
-
-            //Collider[] hitColliders = Physics.OverlapSphere(rigidbody.position+(Vector3.down*0.4f), 0.2f);
-            //int i = 0;
-            //while (i < hitColliders.Length)
-            //{
-            //    if (hitColliders[i].GetComponent<EgoComponent>().HasComponents<JumpOffable>())
-            //    {
-            //        SetOnGround(movement);
-            //    }
-            //    if (hitColliders[i].GetComponent<EgoComponent>().HasComponents<PassThrough>())
-            //    {
-            //        movement.onPassThrough = true;
-            //    }
-            //    i++;
-            //}
-
             Vector3 intendedVector = new Vector3(input.horizontalAxis * movement.xSpeed, input.verticalAxis * movement.ySpeed, 0f);
             movement.velocity.x = Mathf.Lerp(movement.velocity.x, intendedVector.x, Time.fixedDeltaTime);
 
@@ -60,11 +38,15 @@ public class MovementSystem : EgoSystem<
                 }
                 movement.velocity.x = Mathf.Lerp(movement.velocity.x, 0f, Time.fixedDeltaTime * movement.windResistance);
             }
-            if (movement.onPassThrough)
+            if (movement.canPassThrough)
             {
                 if (intendedVector.y < 0)
                 {
+                    movement.canPassThrough = false;
+                    
                     rigidbody.MovePosition(rigidbody.position - (Vector3.up));
+                    var pE = new PassThroughEvent(actor.guid);
+                    EgoEvents<PassThroughEvent>.AddEvent(pE);
                 }
             }
             if (movement.onGround)
@@ -96,18 +78,15 @@ public class MovementSystem : EgoSystem<
                 movement.falling = true;
             }
         });
-
     }
 
     private static void Dive(Movement movement, Vector3 intendedVector)
-    {
-      
+    {      
         movement.velocity.y = Mathf.Lerp(movement.velocity.y, intendedVector.y, Time.fixedDeltaTime);
     }
 
     private static void Fall(Movement movement)
-    {
-        //Debug.Log("falling");
+    {       
         movement.velocity.y = Mathf.Lerp(movement.velocity.y, movement.fallSpeed, Time.fixedDeltaTime);
     }
 
@@ -147,54 +126,11 @@ public class MovementSystem : EgoSystem<
             var e = new JumpEvent(actor.guid, movement.velocity);
             EgoEvents<JumpEvent>.AddEvent(e);
 
-            movement.numberOfJumpsRemaining--;
-            //movement.onGround = false;
-            movement.onPassThrough = false;
+            movement.numberOfJumpsRemaining--;                  
         }
     }
+
     // Event Handler Methods
-
-    void Handle(CollisionEnterEvent e)
-    {
-
-        if (e.egoComponent1.HasComponents<Movement>() && e.egoComponent2.HasComponents<Ground>())
-        {
-            Movement movement;
-            if (!e.egoComponent1.TryGetComponents(out movement))
-                return;
-            SetOnGround(movement);
-        }
-        if (e.egoComponent1.HasComponents<Ground>() && e.egoComponent2.HasComponents<Movement>())
-        {
-            Movement movement;
-            if (!e.egoComponent2.TryGetComponents(out movement))
-                return;
-            SetOnGround(movement);
-        }
-
-        if (e.egoComponent1.HasComponents<Movement>() && e.egoComponent2.HasComponents<PassThrough>())
-        {
-            Movement movement;
-            if (!e.egoComponent1.TryGetComponents(out movement))
-                return;
-            movement.onPassThrough = true;
-            Debug.Log("onPassThrough");
-        }
-        if (e.egoComponent1.HasComponents<PassThrough>() && e.egoComponent2.HasComponents<Movement>())
-        {
-            Movement movement;
-            if (!e.egoComponent2.TryGetComponents(out movement))
-                return;
-            Debug.Log("onPassThrough");
-            movement.onPassThrough = true;
-        }
-    }
-
-    void Handle(CollisionExitEvent e)
-    {
-        Debug.Log("CollisionExitEvent");
-    }
-
     void Handle(TouchGroundEvent e)
     {
         constraint.ForEachGameObject((egoComponent, rigidbody, input, movement, actor) =>
@@ -215,7 +151,16 @@ public class MovementSystem : EgoSystem<
             }
         });
     }
-
+    void Handle(TouchPassThroughEvent e)
+    {
+        constraint.ForEachGameObject((egoComponent, rigidbody, input, movement, actor) =>
+        {
+            if (e.actorGuid == actor.guid)
+            {
+                movement.canPassThrough=e.isTouchingPassThrough;
+            }
+        });
+    }
     void SetOnGround(Movement movement)
     {
        

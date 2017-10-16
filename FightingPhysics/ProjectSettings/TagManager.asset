@@ -17,9 +17,9 @@ TagManager:
   - OneSideCollide
   - CharacterUp
   - CharacterDown
-  - 
-  - 
-  - 
+  - PassThrough
+  - CharacterPassThrough
+  - Body
   - 
   - 
   - 

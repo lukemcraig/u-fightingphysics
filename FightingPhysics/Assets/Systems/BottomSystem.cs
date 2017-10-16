@@ -12,6 +12,7 @@ public class BottomSystem : EgoSystem<
         EgoEvents<CollisionExitEvent>.AddHandler(Handle);
         EgoEvents<JumpEvent>.AddHandler(Handle);
         EgoEvents<FallEvent>.AddHandler(Handle);
+        EgoEvents<PassThroughEvent>.AddHandler(Handle);
     }
 
     void Handle(CollisionEnterEvent e)
@@ -45,6 +46,35 @@ public class BottomSystem : EgoSystem<
                 return;
             SetOnGround(actor);
         }
+
+        if (e.egoComponent1.HasComponents<BottomComponent>() && e.egoComponent2.HasComponents<PassThrough>())
+        {
+            foreach (ContactPoint contact in e.collision.contacts)
+            {
+                if (contact.normal.y <= 0f)
+                {
+                    return;
+                }
+            }
+            ActorComponent actor;
+            if (!e.egoComponent1.TryGetComponents(out actor))
+                return;
+            SetOnPassThrough(actor);
+        }
+        if (e.egoComponent2.HasComponents<BottomComponent>() && e.egoComponent1.HasComponents<PassThrough>())
+        {
+            foreach (ContactPoint contact in e.collision.contacts)
+            {
+                if (contact.normal.y <= 0f)
+                {
+                    return;
+                }
+            }
+            ActorComponent actor;
+            if (!e.egoComponent2.TryGetComponents(out actor))
+                return;
+            SetOnPassThrough(actor);
+        }
     }
 
     void Handle(CollisionExitEvent e)
@@ -65,6 +95,22 @@ public class BottomSystem : EgoSystem<
                 return;
             SetOffGround(actor);
         }
+
+        if (e.egoComponent1.HasComponents<BottomComponent>() && e.egoComponent2.HasComponents<PassThrough>())
+        {
+            ActorComponent actor;
+            if (!e.egoComponent1.TryGetComponents(out actor))
+                return;
+            SetOffPassThrough(actor);
+        }
+        if (e.egoComponent2.HasComponents<BottomComponent>() && e.egoComponent1.HasComponents<PassThrough>())
+        {
+            ActorComponent actor;
+
+            if (!e.egoComponent2.TryGetComponents(out actor))
+                return;
+            SetOffPassThrough(actor);
+        }
     }
     void Handle(JumpEvent e)
     {
@@ -84,11 +130,24 @@ public class BottomSystem : EgoSystem<
             if (actor.guid == e.actorGuid)
             {
                 // collider.enabled = true;
-                egoComponent.gameObject.layer = 11;
+                if (egoComponent.gameObject.layer != 13)
+                {
+                    egoComponent.gameObject.layer = 11;
+                }
             }
         });
     }
-
+    void Handle(PassThroughEvent e)
+    {
+        constraint.ForEachGameObject((egoComponent, bottomComponent, transform, actor, collider) =>
+        {
+            if (actor.guid == e.actorGuid)
+            {
+                Debug.Log("PassThrough");
+                bottomComponent.gameObject.layer = 13;
+            }
+        });
+    }
     void SetOnGround(ActorComponent actorComponent)
     {
         constraint.ForEachGameObject((egoComponent, bottomComponent, transform, actor, collider) =>
@@ -102,6 +161,19 @@ public class BottomSystem : EgoSystem<
                 }
         });
     }
+    void SetOnPassThrough(ActorComponent actorComponent)
+    {
+        constraint.ForEachGameObject((egoComponent, bottomComponent, transform, actor, collider) =>
+        {
+            if (actor.guid == actorComponent.guid)
+                if (!bottomComponent.touchingPassThrough)
+                {
+                    var e = new TouchPassThroughEvent(actor.guid, true);
+                    EgoEvents<TouchPassThroughEvent>.AddEvent(e);
+                    bottomComponent.touchingPassThrough = true;
+                }
+        });
+    }
     void SetOffGround(ActorComponent actorComponent)
     {        
         constraint.ForEachGameObject((egoComponent, bottomComponent, transform, actor, collider) =>
@@ -112,6 +184,20 @@ public class BottomSystem : EgoSystem<
                     var e = new TouchGroundEvent(actor.guid, false);
                     EgoEvents<TouchGroundEvent>.AddEvent(e);
                     bottomComponent.touchingGround = false;
+                }
+        });
+    }
+    void SetOffPassThrough(ActorComponent actorComponent)
+    {
+        Debug.Log("SetOffPassThrough");
+        constraint.ForEachGameObject((egoComponent, bottomComponent, transform, actor, collider) =>
+        {
+            if (actor.guid == actorComponent.guid)
+                if (bottomComponent.touchingPassThrough)
+                {                   
+                    var e = new TouchPassThroughEvent(actor.guid, false);
+                    EgoEvents<TouchPassThroughEvent>.AddEvent(e);
+                    bottomComponent.touchingPassThrough = false;
                 }
         });
     }

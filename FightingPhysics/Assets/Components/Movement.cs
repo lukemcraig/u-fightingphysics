@@ -5,8 +5,8 @@ using UnityEngine;
 public class Movement : MonoBehaviour
 {
     public bool onGround = false;
-    public bool onPassThrough = false;
     public bool falling = false;
+    public bool canPassThrough = false;
 
     public Vector3 velocity = new Vector3(0f, 0f, 0f);
 
@@ -19,5 +19,7 @@ public class Movement : MonoBehaviour
     public float fallSpeed = -20f;
     public float friction = 5f;
     public float windResistance = 1f;
+
+   
     
 }
