@@ -12,6 +12,7 @@ public class FightgameInterface : MonoBehaviour
             new InputSystem(),            
             new MovementSystem(),
             new BottomSystem(),
+            new CameraSystem(),
 
             new JumpParticleSystem(),
             new RunParticleSystem(),
