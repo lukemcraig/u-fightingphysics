@@ -72,7 +72,8 @@ public class BottomSystem : EgoSystem<
         {
             if (actor.guid == e.actorGuid)
             {
-                collider.enabled = false;
+                // collider.enabled = false;
+                egoComponent.gameObject.layer = 10;
             }
         });
     }
@@ -82,7 +83,8 @@ public class BottomSystem : EgoSystem<
         {
             if (actor.guid == e.actorGuid)
             {
-                collider.enabled = true;
+                // collider.enabled = true;
+                egoComponent.gameObject.layer = 11;
             }
         });
     }
