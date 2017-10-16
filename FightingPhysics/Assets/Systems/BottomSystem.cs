@@ -9,6 +9,7 @@ public class BottomSystem : EgoSystem<
     public override void Start()
     {        
         EgoEvents<CollisionEnterEvent>.AddHandler(Handle);
+        EgoEvents<TriggerEnterEvent>.AddHandler(Handle);
         EgoEvents<CollisionExitEvent>.AddHandler(Handle);
         EgoEvents<JumpEvent>.AddHandler(Handle);
         EgoEvents<FallEvent>.AddHandler(Handle);
@@ -112,6 +113,26 @@ public class BottomSystem : EgoSystem<
             SetOffPassThrough(actor);
         }
     }
+    void Handle(TriggerEnterEvent e)
+    {
+        Debug.Log("collision exit");
+        if (e.egoComponent1.HasComponents<BottomComponent>() && e.egoComponent2.HasComponents<UnpassThroughComponent>())
+        {
+            ActorComponent actor;
+            if (!e.egoComponent1.TryGetComponents(out actor))
+                return;
+            SetLayerBack(actor);
+        }
+        if (e.egoComponent2.HasComponents<BottomComponent>() && e.egoComponent1.HasComponents<UnpassThroughComponent>())
+        {
+            ActorComponent actor;
+
+            if (!e.egoComponent2.TryGetComponents(out actor))
+                return;
+            SetLayerBack(actor);
+        }
+
+    }
     void Handle(JumpEvent e)
     {
         constraint.ForEachGameObject((egoComponent, bottomComponent, transform, actor, collider) =>
@@ -145,7 +166,17 @@ public class BottomSystem : EgoSystem<
             {
                 Debug.Log("PassThrough");
                 bottomComponent.gameObject.layer = 13;
+               
             }
+        });
+    }
+    void SetLayerBack(ActorComponent actorComponent)
+    {
+       
+        constraint.ForEachGameObject((egoComponent, bottomComponent, transform, actor, collider) =>
+        {
+            if (actor.guid == actorComponent.guid)
+                transform.gameObject.layer = 11;
         });
     }
     void SetOnGround(ActorComponent actorComponent)
